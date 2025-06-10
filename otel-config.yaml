@@ -1,4 +1,3 @@
-# Receivers
 receivers:
   otlp:
     protocols:
@@ -6,22 +5,22 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-        
-# Processors
+
 processors:
   batch:
 
-# Exporters
 exporters:
   otlphttp/logs:
     endpoint: "http://loki:3100/otlp"
     tls:
       insecure: true
-      
-# Pipelines
+
+  logging:                    # <-- nome do exporter
+    loglevel: debug           # <-- campo em minúsculas
+
 service:
   pipelines:
     logs:
-      receivers: [otlp]
+      receivers:  [otlp]
       processors: [batch]
-      exporters: [otlphttp/logs]
+      exporters:  [otlphttp/logs, logging]
