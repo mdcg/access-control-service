@@ -22,6 +22,9 @@ type Environments struct {
 	RabbitMQPort                 string `mapstructure:"RABBITMQ_PORT"`
 	RabbitMQUsername             string `mapstructure:"RABBITMQ_USERNAME"`
 	RabbitMQPassword             string `mapstructure:"RABBITMQ_PASSWORD"`
+	OtelExporterOtlpEndpoint     string `mapstructure:"OTEL_EXPORTER_OTLP_ENDPOINT"`
+	OtelExporterOtlpInsecure     string `mapstructure:"OTEL_EXPORTER_OTLP_INSECURE"`
+	OtelServiceName              string `mapstructure:"OTEL_SERVICE_NAME"`
 }
 
 // Função responsável por carregar as variáveis de ambiente
@@ -30,6 +33,9 @@ func LoadEnvVars() *Environments {
 	viper.SetConfigFile(".env")
 
 	// Define valores padrão caso não estejam presentes no .env ou nas variáveis de ambiente
+	viper.SetDefault("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318")
+	viper.SetDefault("OTEL_EXPORTER_OTLP_INSECURE", "true")
+	viper.SetDefault("OTEL_SERVICE_NAME", "access-control-service")
 	viper.SetDefault("MONGODB_URI", "mongodb://localhost:27017")
 	viper.SetDefault("MONGODB_DATABASE", "access-control")
 	viper.SetDefault("MONGODB_PERMISSION_COLLECTION", "permission")

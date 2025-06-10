@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"log"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mdcg/access-control-service/config"
-	"github.com/mdcg/access-control-service/internal/http/gin"
+	_gin "github.com/mdcg/access-control-service/internal/http/gin"
+	"github.com/mdcg/access-control-service/internal/logging"
 	"github.com/mdcg/access-control-service/internal/mongo"
 	"github.com/mdcg/access-control-service/restriction"
 	mongo_repo "github.com/mdcg/access-control-service/restriction/mongo"
@@ -19,12 +22,28 @@ func apiCommand() *cobra.Command {
 			envVars := config.LoadEnvVars()
 			ctx := context.Background()
 
+			logger, err := logging.InitLog(ctx, envVars.OtelServiceName)
+			if err != nil {
+				log.Fatalf("error! %s", err)
+			}
+
+			logger.Info("🚀 Enviando log de teste para Loki")
+			defer func() {
+				if err := logging.Shutdown(ctx); err != nil {
+					logger.Error("Shutdown do logger falhou", "err", err)
+				}
+			}()
+
 			db := mongo.ConnectDB(envVars.MongoDBURI, envVars.MongoDBDatabase)
 			repo := mongo_repo.NewRestrictionStore(ctx, db)
 
 			restrictionService := restriction.NewService(repo)
 
-			h := gin.Handlers(restrictionService)
+			h := _gin.Handlers(restrictionService)
+			h.GET("/health", func(c *gin.Context) {
+				logger.Info("Health check recebido")
+				c.JSON(200, gin.H{"ok": true})
+			})
 
 			h.Run(":8080")
 		},
