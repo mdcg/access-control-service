@@ -21,10 +21,10 @@ var provider *sdklog.LoggerProvider
 //	OTEL_SERVICE_NAME="meu-servico"
 //	OTEL_EXPORTER_OTLP_ENDPOINT="meu-collector:4317"
 //	OTEL_EXPORTER_OTLP_INSECURE=true
-func InitLog(ctx context.Context, serviceName string) (*slog.Logger, error) {
+func InitLog(ctx context.Context, serviceName string, tags map[string]string) (*slog.Logger, error) {
 	exp, err := otlploghttp.New(
 		ctx,
-		otlploghttp.WithEndpoint("localhost:4318"), // o serviço do Collector no docker-compose
+		otlploghttp.WithEndpoint("localhost:4318"),
 		otlploghttp.WithInsecure(),
 	)
 	if err != nil {
@@ -34,7 +34,16 @@ func InitLog(ctx context.Context, serviceName string) (*slog.Logger, error) {
 		sdklog.WithProcessor(sdklog.NewBatchProcessor(exp)),
 	)
 	global.SetLoggerProvider(provider)
-	return otelslog.NewLogger(serviceName), nil
+
+	// Monta atributos a partir do mapa de tags
+	attrs := make([]any, 0, len(tags)+1)
+	attrs = append(attrs, slog.String("service.name", serviceName))
+	for k, v := range tags {
+		attrs = append(attrs, slog.String(k, v))
+	}
+
+	logger := otelslog.NewLogger(serviceName).With(attrs...)
+	return logger, nil
 }
 
 // Shutdown garante envio de todos os logs pendentes antes de fechar a aplicação.

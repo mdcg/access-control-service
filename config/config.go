@@ -25,6 +25,7 @@ type Environments struct {
 	OtelExporterOtlpEndpoint     string `mapstructure:"OTEL_EXPORTER_OTLP_ENDPOINT"`
 	OtelExporterOtlpInsecure     string `mapstructure:"OTEL_EXPORTER_OTLP_INSECURE"`
 	OtelServiceName              string `mapstructure:"OTEL_SERVICE_NAME"`
+	Env                          string `mapstructure:"ENV"`
 }
 
 // Função responsável por carregar as variáveis de ambiente
@@ -46,6 +47,7 @@ func LoadEnvVars() *Environments {
 	viper.SetDefault("RABBITMQ_PORT", "5672")
 	viper.SetDefault("RABBITMQ_USERNAME", "admin")
 	viper.SetDefault("RABBITMQ_PASSWORD", "admin123")
+	viper.SetDefault("ENV", "development")
 
 	// Permite que o Viper também leia variáveis de ambiente do sistema operacional
 	viper.AutomaticEnv()

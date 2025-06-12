@@ -22,7 +22,10 @@ func apiCommand() *cobra.Command {
 			envVars := config.LoadEnvVars()
 			ctx := context.Background()
 
-			logger, err := logging.InitLog(ctx, envVars.OtelServiceName)
+			logger, err := logging.InitLog(ctx, envVars.OtelServiceName, map[string]string{
+				"env":       envVars.Env,
+				"component": "api",
+			})
 			if err != nil {
 				log.Fatalf("error! %s", err)
 			}
